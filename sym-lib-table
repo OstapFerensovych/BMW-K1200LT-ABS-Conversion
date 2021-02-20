@@ -1,0 +1,4 @@
+(sym_lib_table
+  (lib (name HCCPHPE24BKA90F)(type Legacy)(uri ${KIPRJMOD}/Lib/HCCPHPE24BKA90F.lib)(options "")(descr ""))
+  (lib (name BMW-IABS-Converter-rescue)(type Legacy)(uri ${KIPRJMOD}/BMW-IABS-Converter-rescue.lib)(options "")(descr ""))
+)
