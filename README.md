@@ -3,8 +3,8 @@
 ![BMW K1200LT ABS Conversion](docs/bmw-abs.png)
 
 BMW K1200LT iABS to iABS gen 2 Conversion PCB and Firmware.  
-I used ABS module from R1200GS 2010.  
-It uses CAN bus to communicate with ZFE, DME modules in original R1200GS schematic.  
+BMW R1200GS 2010 iABS-II module is used in this project.  
+iABS-II uses CAN bus to communicate with ZFE, DME modules in original R1200GS schematic.  
 
 This project is developed to provide K1200LT signals from iABS-II CAN bus:
 - Speed signal for K1200LT dash
