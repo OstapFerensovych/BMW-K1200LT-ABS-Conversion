@@ -9,7 +9,10 @@ This project is developed to provide K1200LT necessary signals from iABS-II CAN 
 - Speed signal for K1200LT dash
 - Brake and tail lights output
 - ABS warning LED output
-- General warning LED output
+- General warning LED output  
+
+![PCB Render](docs/RevA-1.png)
+![PCB Render](docs/RevA-2.png)
 
 ## Other resources. 
 [Shematics](docs/)
