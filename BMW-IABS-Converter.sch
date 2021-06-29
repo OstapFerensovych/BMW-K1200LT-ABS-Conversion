@@ -990,19 +990,6 @@ Wire Wire Line
 Text Label 1275 2325 2    50   ~ 0
 SWDIO
 $Comp
-L MCU_ST_STM32F0:STM32F042F4Px U?
-U 1 1 60302FF9
-P 2475 2075
-AR Path="/602C3F48/60302FF9" Ref="U?"  Part="1" 
-AR Path="/60302FF9" Ref="U2"  Part="1" 
-F 0 "U2" H 2875 2725 50  0000 C CNN
-F 1 "STM32F042F4P6" H 2475 2100 50  0000 C CNN
-F 2 "Package_SO:SO-20_12.8x7.5mm_P1.27mm" H 1975 1375 50  0001 R CNN
-F 3 "http://www.ti.com/lit/ds/symlink/lm2904-n.pdf" H 2475 2075 50  0001 C CNN
-	1    2475 2075
-	1    0    0    -1  
-$EndComp
-$Comp
 L Regulator_Switching:MC34063AD U6
 U 1 1 6032D865
 P 2575 6725
@@ -2047,4 +2034,15 @@ F 3 "" H 7425 3750 50  0001 C CNN
 $EndComp
 Wire Wire Line
 	1000 2425 1000 2600
+$Comp
+L MCU_ST_STM32F0:STM32F042F4Px U2
+U 1 1 60DB6135
+P 2475 2075
+F 0 "U2" H 2025 2725 50  0000 C CNN
+F 1 "STM32F042F4Px" H 2475 2075 50  0000 C CNN
+F 2 "Package_SO:TSSOP-20_4.4x6.5mm_P0.65mm" H 1975 1375 50  0001 R CNN
+F 3 "http://www.st.com/st-web-ui/static/active/en/resource/technical/document/datasheet/DM00105814.pdf" H 2475 2075 50  0001 C CNN
+	1    2475 2075
+	1    0    0    -1  
+$EndComp
 $EndSCHEMATC
