@@ -1,0 +1,15 @@
+.
+./core
+./core/gpio
+./core/capsense
+./core/can
+./core/core
+./core/i2cbus
+./core/printf
+./core/led
+./cmsis
+./cmsis/inc
+./cmsis/device
+./cmsis/device/src
+./cmsis/device/inc
+./out

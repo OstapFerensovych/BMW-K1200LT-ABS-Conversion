@@ -1,0 +1,11 @@
+APPLICATION := BMW-K1200LT-ABS-Converter
+CPU_FLAGS   := -mthumb -mcpu=cortex-m0
+FLASH_SIZE  := 16*1024
+RAM_SIZE    := 6*1024
+GLOBAL_DEFS := -DSTM32F042x6
+LIBS :=
+
+SEMIHOSTING := 1
+
+DEBUG         := 1
+VERBOSE_BUILD := 1
