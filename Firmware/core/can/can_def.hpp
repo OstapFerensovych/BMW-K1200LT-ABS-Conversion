@@ -1,12 +1,19 @@
 #pragma once
 
-/* Flamingo SensCAP CAN Protocol */
-#define CAN_LED_ID_Pos     (0U)
-#define CAN_LED_ID_Msk     (0x3)
-#define CAN_LED_STATE_Pos  (2U)
-#define CAN_LED_STATE_Msk  (0xC)
-#define CAN_LED_PERIOD_Pos (16U)
-#define CAN_LED_PERIOD_Msk (0xFFFF0000)
+const uint16_t can_id_abs_status = 0x294;
+
+#define CAN_FR_SENSOR_OK_Pos (0U+48U)
+#define CAN_FR_SENSOR_OK_Msk (0x1000000000000)
+#define CAN_RR_SENSOR_OK_Pos (1U+48U)
+#define CAN_RR_SENSOR_OK_Msk (0x2000000000000)
+
+#define CAN_FR_LEVR_Pos  (2U+48U)
+#define CAN_FR_LEVR_Msk  (0x4000000000000)
+#define CAN_RR_LEVR_Pos  (3U+48U)
+#define CAN_RR_LEVR_Msk  (0x8000000000000)
+
+#define CAN_SPEED_Pos           (16U)
+#define CAN_SPEED_Msk           (0xFFFF0000)
 
 /* bxCAN Related */
 #define CAN_INIT_MODE_TMO 10

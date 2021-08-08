@@ -1,12 +1,7 @@
 #pragma once
 #include <stdio.h>
 #include "capsense.hpp"
-/*
- *  CAN Identification
- *  0-4 bits Command ID. Max. 0x1F
- *  5-8 bits Device ID. Max. 0x0F
- *  9-10 bits Device enumerator. Max 0x03
-*/
+#include <cstdint>
 
 enum CanCmd_e {
   CS_MSG_SET_CAPSENSE_LED_STATUS,
@@ -26,6 +21,8 @@ const uint8_t SIDE = SIDE_RIGHT;
 
 #define CAN_DEVID_SENSCAP 0x2
 
+
+
 #define CAN_CMD_Pos      0
 #define CAN_CMD_Msk      0x1F
 #define CAN_DEVID_Pos    5
@@ -40,3 +37,8 @@ const uint8_t SIDE = SIDE_RIGHT;
 int CAN_Init();
 void CAN_send_button_state(ButtonStatus status);
 void CAN_hearbeat(ButtonStatus status);
+bool CAN_front_lever();
+bool CAN_rear_lever();
+bool CAN_front_sensor_ok();
+bool CAN_rear_sensor_ok();
+uint8_t CAN_Speed();

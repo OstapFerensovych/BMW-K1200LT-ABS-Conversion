@@ -68,43 +68,9 @@ bool capsense_read(uint8_t cs_num) {
 extern "C" void TIM2_IRQHandler();
 extern "C" void TIM2_IRQHandler() {
   __disable_irq();
-  cs.touch = capsense_read(0);
 
-  if(!cs.touch) {
-    cs.released = true;
-  }
-
-  if(cs.touch && cs.released) {
-    cs.tp_prs_tick++;
-    if(cs.tp_prs_tick > BTN_LONG_PRESS_TICKS) {
-//      printf("Long Press\r\n");
-      cs.tp_state = ButtonStatus::kLongPressTriggered;
-      CAN_send_button_state(cs.tp_state);
-      cs.tp_prs_tick = 0;
-      cs.released = false;
-
-    }
-  } else if ((cs.tp_prs_tick > BTN_SHORT_PRESS_TICKS)) {
-//    printf("Short press\r\n");
-    cs.tp_state = ButtonStatus::kShortPress;
-    CAN_send_button_state(cs.tp_state);
-    cs.released = false;
-    cs.tp_prs_tick = 0;
-  } else {
-    cs.tp_prs_tick = 0;
-  }
 
   __enable_irq();
   TIM2->SR &= ~TIM_SR_CC1IF;
   TIM2->CNT = 0;
-
-  count++;
-  if(count >= 5) {
-    count = 0;
-    if(cs.touch) {
-      CAN_hearbeat(ButtonStatus::kPressing);
-    } else {
-      CAN_hearbeat(ButtonStatus::kNotPressed);
-    }
-  }
 }

@@ -12,21 +12,3 @@
 //  gpio::clear<gpio::line::led_green>,
 //  gpio::clear<gpio::line::led_blue>,
 //};
-
-void LED_init(){
-
-}
-
-void LED_on(Color color) {
-//  led_on[static_cast<uint8_t>(color)]();
-}
-
-void LED_off(Color color) {
-//  led_off[static_cast<uint8_t>(color)]();
-}
-
-void LED_blink(Color color, uint8_t period) {
-  //TODO Blinking...
-  (void)color;
-  (void)period;
-}

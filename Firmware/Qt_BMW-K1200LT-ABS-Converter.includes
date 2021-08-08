@@ -4,6 +4,7 @@
 ./core/capsense
 ./core/can
 ./core/core
+./core/speedo
 ./core/i2cbus
 ./core/printf
 ./core/led
