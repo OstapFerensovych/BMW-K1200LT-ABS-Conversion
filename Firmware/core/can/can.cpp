@@ -3,31 +3,30 @@
 #include <cstring>
 #include <stdio.h>
 #include "can_def.hpp"
-#include "led.hpp"
-
-#include "capsense.hpp"
 
 struct can_Message_t {
     uint32_t id = 0x000;  // 11-bit max is 0x7ff, 29-bit max is 0x1FFFFFFF
     bool isExt = false;
     bool rtr = false;
     uint8_t len = 8;
-    uint8_t buf[8] = {0, 0, 0, 0, 0, 0, 0, 0};
+    uint8_t buf[8] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
 } ;
 
-bool front_lever = false;
-bool rear_lever = false;
-bool front_sensor_ok = false; //After two turns of the wheel
-bool rear_sensor_ok = false; //After two turns of the wheel
-uint16_t speed_kmh = 0;
+volatile bool front_lever = false;
+volatile bool rear_lever = false;
+volatile bool front_sensor_ok = false; //After two turns of the wheel
+volatile bool rear_sensor_ok = false; //After two turns of the wheel
+volatile float speed_kmh = 0;
+volatile bool abs_status = false; // ABS ON/OFF Status
 
 bool CAN_front_lever() {return front_lever;}
 bool CAN_rear_lever() {return rear_lever;}
 bool CAN_front_sensor_ok() {return front_sensor_ok;}
 bool CAN_rear_sensor_ok() {return rear_sensor_ok;}
+bool CAN_abs_on() {return abs_status;}
 uint8_t CAN_Speed() {return speed_kmh;}
 
-static void CAN_Transmit(can_Message_t msg);
+//static void CAN_Transmit(can_Message_t msg);
 static void abs_status_callback(can_Message_t *msg);
 static void process_message(CanCmd_e cmd, can_Message_t *msg);
 
@@ -193,7 +192,7 @@ extern "C" void CEC_CAN_IRQHandler(void) {
         }
         __enable_irq();
 
-//        printf("id:0x%X data:0x%02X%02X%02X%02X%02X%02X%02X%02X\n", rxmsg.id, rxmsg.buf[7], rxmsg.buf[6], rxmsg.buf[5], rxmsg.buf[4], rxmsg.buf[3], rxmsg.buf[2], rxmsg.buf[1], rxmsg.buf[0]);
+//        printf("id:0x%lX data:0x%02X%02X%02X%02X%02X%02X%02X%02X\n", rxmsg.id, rxmsg.buf[7], rxmsg.buf[6], rxmsg.buf[5], rxmsg.buf[4], rxmsg.buf[3], rxmsg.buf[2], rxmsg.buf[1], rxmsg.buf[0]);
 //        printf("f:%d r:%d sf:%d sr:%d\n", front_lever, rear_lever, front_sensor_ok, rear_sensor_ok);
 //        printf("speed:%d\n", speed_kmh);
         process_message(static_cast<CanCmd_e>(mailbox_id), &rxmsg);
@@ -207,58 +206,26 @@ static void process_message(CanCmd_e cmd, can_Message_t *msg) {
     }
 }
 
-//void CAN_send_button_state(ButtonStatus status) {
-//  can_Message_t msg;
-//  msg.id = SENSCAP_MAKE_CANID(CS_MSG_EVT_BUTTON);
-//  msg.len = 1;
-//  msg.buf[0] = static_cast<uint8_t>(status);
-//  CAN_Transmit(msg);
-//}
-
-//void CAN_hearbeat(ButtonStatus status) {
-//  can_Message_t msg;
-//  msg.id = SENSCAP_MAKE_CANID(CS_HEARTBEAT);
-//  msg.len = 1;
-//  msg.buf[0] = static_cast<uint8_t>(status);
-//  CAN_Transmit(msg);
-//}
-
 static void abs_status_callback(can_Message_t *msg) {
     uint64_t data;
     memcpy(&data, msg->buf, sizeof(uint64_t));
 
     front_lever = (data & CAN_FR_LEVR_Msk) >> CAN_FR_LEVR_Pos;
     rear_lever = (data & CAN_RR_LEVR_Msk) >> CAN_RR_LEVR_Pos;
-    front_sensor_ok = (data & CAN_FR_SENSOR_OK_Msk) >> CAN_FR_SENSOR_OK_Pos; //After two turns of the wheel
-    rear_sensor_ok = (data & CAN_RR_SENSOR_OK_Msk) >> CAN_RR_SENSOR_OK_Pos; //After two turns of the wheel
-    speed_kmh = ((data & CAN_SPEED_Msk) >> CAN_SPEED_Pos) * 0.0625f;
+    front_sensor_ok = (data & CAN_FR_SENSOR_OK_Msk) >> CAN_FR_SENSOR_OK_Pos; //Goes 0 after two turns of the wheel
+    rear_sensor_ok = (data & CAN_RR_SENSOR_OK_Msk) >> CAN_RR_SENSOR_OK_Pos; //Goes 0 after two turns of the wheel
+    speed_kmh = ((data & CAN_SPEED_Msk) >> CAN_SPEED_Pos) * 0.06f; //0.0625f;
+    abs_status = ((data & CAN_ABS_STATUS_Msk) >> CAN_ABS_STATUS_Pos) == 0x5;
 }
 
-//static void set_led_callback(can_Message_t *msg) {
-//    if(reinterpret_cast<can_Message_t*>(msg)->len != 8) return;
-//    /*
-//   * CAN message LED data register (64bits)
-//   * | _____________period[31:16]______________ |
-//   * | reserved[15:4] | state[3:2] | ledid[1:0] |
-//   */
-//    uint64_t data;
-//    memcpy(&data, msg->buf, sizeof(uint64_t));
-
-//    Color led_color = static_cast<Color>((data & CAN_LED_ID_Msk) >> CAN_LED_ID_Pos);
-//    Status status = static_cast<Status>((data & CAN_LED_STATE_Msk) >> CAN_LED_STATE_Pos);
-//    uint16_t period = (data & CAN_LED_PERIOD_Msk) >> CAN_LED_PERIOD_Pos;
-
-//    switch (status) {
-//    case Status::Off:
-//        LED_off(led_color);
-//        break;
-//    case Status::On:
-//        LED_on(led_color);
-//        break;
-//    case Status::Blink:
-//        LED_blink(led_color, period);
-//        break;
-//    default:
-//        break;
-//    }
-//}
+void send_abs_status() {
+    can_Message_t msg;
+    msg.id = 0x10C;
+    msg.buf[1] = 0x0;
+    msg.buf[2] = 0x30;// RPM 1100
+    msg.buf[3] = 0x11;// RPM 1100
+    msg.buf[5] = (0x6 << 4) | 0x5;
+    msg.buf[6] = 0xF0;
+//     msg.buf[5] = (0x5 << 4) | 0x5;
+    CAN_Transmit(msg);
+}

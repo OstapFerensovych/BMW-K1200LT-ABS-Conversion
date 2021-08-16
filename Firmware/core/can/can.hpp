@@ -1,6 +1,5 @@
 #pragma once
 #include <stdio.h>
-#include "capsense.hpp"
 #include <cstdint>
 
 enum CanCmd_e {
@@ -35,10 +34,10 @@ const uint8_t SIDE = SIDE_RIGHT;
 #define SENSCAP_MAKE_CANID(cmd) CANID_MAKE(SIDE, CAN_DEVID_SENSCAP, cmd)
 
 int CAN_Init();
-void CAN_send_button_state(ButtonStatus status);
-void CAN_hearbeat(ButtonStatus status);
 bool CAN_front_lever();
 bool CAN_rear_lever();
 bool CAN_front_sensor_ok();
 bool CAN_rear_sensor_ok();
+bool CAN_abs_on();
+void send_abs_status();
 uint8_t CAN_Speed();

@@ -2,6 +2,9 @@
 
 const uint16_t can_id_abs_status = 0x294;
 
+#define CAN_ABS_STATUS_Pos (12U)
+#define CAN_ABS_STATUS_Msk (0xF000)
+
 #define CAN_FR_SENSOR_OK_Pos (0U+48U)
 #define CAN_FR_SENSOR_OK_Msk (0x1000000000000)
 #define CAN_RR_SENSOR_OK_Pos (1U+48U)

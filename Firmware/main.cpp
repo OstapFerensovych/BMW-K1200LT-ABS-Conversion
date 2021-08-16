@@ -20,7 +20,7 @@
 
     CAN_Init();
     SPEEDO_Init();
-    SPEEDO_Out(0);
+//    SPEEDO_Out(0);
 
     for (;;){
         if(CAN_front_lever() || CAN_rear_lever()) {
@@ -35,25 +35,15 @@
             gpio::set<gpio::line::abs_warn_relay>();
         }
 
+        if(CAN_abs_on()) {
+            gpio::clear<gpio::line::gen_warn>();
+        } else {
+            gpio::set<gpio::line::gen_warn>();
+        }
+
+//        timing_sleep_ms(10);
+//        send_abs_status();
+
         SPEEDO_Out(CAN_Speed());
-
-//        gpio::set<gpio::line::speedo>();
-//        timing_sleep_ms(10);
-//        gpio::clear<gpio::line::speedo>();
-//        timing_sleep_ms(10);
-//        printf("f:%d r:%d sf:%d sr:%d\n", CAN_front_lever() , CAN_rear_lever() , CAN_front_sensor_ok() , CAN_rear_sensor_ok() );
-
-        // Speed
-//        gpio::set<gpio::line::speedo>();
-//        timing_sleep_ms(10);
-//        gpio::clear<gpio::line::speedo>();
-//        timing_sleep_ms(10);
-
-//        // Lights
-//        gpio::set<gpio::line::tail_lights>();
-//        gpio::clear<gpio::line::tail_lights>();
-
-
-        //    continue;
     }
 }
