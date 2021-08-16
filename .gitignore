@@ -17,3 +17,6 @@ fp-info-cache
 *.net
 
 Gerbers/
+
+*.d
+*.o
