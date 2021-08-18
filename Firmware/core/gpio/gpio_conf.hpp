@@ -22,7 +22,6 @@ constexpr std::pair<line, gpio::pin_config> pins_config[] = {
     {line::can_rx,         {gpio::port::a, 11, 0, gpio::mode::af_io, gpio::drive::push_pull, gpio::speed::high, gpio::pull::none, gpio::alt_func::af4}},
     {line::can_tx,         {gpio::port::a, 12, 0, gpio::mode::af_io, gpio::drive::push_pull, gpio::speed::high, gpio::pull::none, gpio::alt_func::af4}},
     {line::speedo,         {gpio::port::a, 7, 0,  gpio::mode::af_io,  gpio::drive::push_pull, gpio::speed::high, gpio::pull::none, gpio::alt_func::af1 }},
-//    {line::speedo,         {gpio::port::a, 7, 0,  gpio::mode::gp_out,  gpio::drive::push_pull, gpio::speed::low, gpio::pull::none, gpio::alt_func::none }},
     {line::gen_warn,       {gpio::port::a, 6, 0,  gpio::mode::gp_out,  gpio::drive::push_pull, gpio::speed::low, gpio::pull::none, gpio::alt_func::none }},
     {line::abs_warn_relay, {gpio::port::a, 5, 1,  gpio::mode::gp_out,  gpio::drive::push_pull, gpio::speed::low, gpio::pull::none, gpio::alt_func::none }},
     {line::brake_lights,   {gpio::port::a, 4, 1,  gpio::mode::gp_out,  gpio::drive::push_pull, gpio::speed::low, gpio::pull::none, gpio::alt_func::none }},

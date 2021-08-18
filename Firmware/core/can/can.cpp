@@ -16,7 +16,8 @@ volatile bool front_lever = false;
 volatile bool rear_lever = false;
 volatile bool front_sensor_ok = false; //After two turns of the wheel
 volatile bool rear_sensor_ok = false; //After two turns of the wheel
-volatile float speed_kmh = 0;
+volatile float front_speed_kmh = 0;
+volatile float rear_speed_kmh = 0;
 volatile bool abs_status = false; // ABS ON/OFF Status
 
 bool CAN_front_lever() {return front_lever;}
@@ -24,11 +25,13 @@ bool CAN_rear_lever() {return rear_lever;}
 bool CAN_front_sensor_ok() {return front_sensor_ok;}
 bool CAN_rear_sensor_ok() {return rear_sensor_ok;}
 bool CAN_abs_on() {return abs_status;}
-uint8_t CAN_Speed() {return speed_kmh;}
+float CAN_SpeedFrontWheel() {return front_speed_kmh;}
+float CAN_SpeedRearWheel() {return rear_speed_kmh;}
 
 //static void CAN_Transmit(can_Message_t msg);
 static void abs_status_callback(can_Message_t *msg);
-static void process_message(CanCmd_e cmd, can_Message_t *msg);
+static void abs_rear_status_callback(can_Message_t *msg);
+static void process_message(CanCmd_e cmd, can_Message_t msg);
 
 int CAN_Init() {
     uint32_t tmo;
@@ -86,19 +89,22 @@ int CAN_Init() {
 
     /* Enter filter init mode */
     SET_BIT(CAN->FMR, CAN_FMR_FINIT);
-    CAN->FS1R |= (CAN_FS1R_FSC0);
+//    CAN->FS1R |= (CAN_FS1R_FSC0);
 //    CAN->FS1R |= (CAN_FS1R_FSC0 | CAN_FS1R_FSC1);
 
     /* Acivate filter 0 */
     SET_BIT(CAN->FA1R, CAN_FA1R_FACT0);
-//    SET_BIT(CAN->FA1R, CAN_FA1R_FACT1);
+    SET_BIT(CAN->FA1R, CAN_FA1R_FACT1);
 
     /*  Set the Id and the mask */
-    CAN->sFilterRegister[0].FR1 = can_id_abs_status << 21; //ID CAN_CMD_LED
-    CAN->sFilterRegister[0].FR2 = CAN_ID_MASK << 21; //MASK
+    CAN->sFilterRegister[0].FR1 = can_id_abs_status << 5 | 0xFF70U << 16;
+    CAN->sFilterRegister[1].FR1 = can_id_abs_rear_status << 5 | 0xFF70U << 16;
 
-    //  CAN->sFilterRegister[1].FR1 = SENSCAP_MAKE_CANID(CS_MSG_SET_CONFIG) << 21; //ID CAN_CMD_SERVICE
-    //  CAN->sFilterRegister[1].FR2 = CAN_ID_MASK << 21; //MASK
+//    CAN->sFilterRegister[0].FR1 = can_id_abs_status << 21;
+//    CAN->sFilterRegister[0].FR2 = CAN_ID_MASK << 21; //MASK
+
+//    CAN->sFilterRegister[1].FR1 = can_id_abs_rear_status << 21;
+//    CAN->sFilterRegister[1].FR2 = CAN_ID_MASK << 21; //MASK
 
     /* Leave filter init */
     CLEAR_BIT(CAN->FMR, CAN_FMR_FINIT);
@@ -113,44 +119,44 @@ int CAN_Init() {
     return 0;
 }
 
-static void CAN_Transmit(can_Message_t msg) {
-    uint32_t txmailbox;
-    uint32_t tsr = READ_REG(CAN->TSR);
+//static void CAN_Transmit(can_Message_t msg) {
+//    uint32_t txmailbox;
+//    uint32_t tsr = READ_REG(CAN->TSR);
 
-    if (((tsr & CAN_TSR_TME0) != 0U) ||
-            ((tsr & CAN_TSR_TME1) != 0U) ||
-            ((tsr & CAN_TSR_TME2) != 0U)) {
-        txmailbox = (tsr & CAN_TSR_CODE) >> CAN_TSR_CODE_Pos;
-        if (txmailbox > 2U) {
-            return; //ERROR
-        }
+//    if (((tsr & CAN_TSR_TME0) != 0U) ||
+//            ((tsr & CAN_TSR_TME1) != 0U) ||
+//            ((tsr & CAN_TSR_TME2) != 0U)) {
+//        txmailbox = (tsr & CAN_TSR_CODE) >> CAN_TSR_CODE_Pos;
+//        if (txmailbox > 2U) {
+//            return; //ERROR
+//        }
 
-        CAN->sTxMailBox[txmailbox].TDTR = msg.len; //fill data length
+//        CAN->sTxMailBox[txmailbox].TDTR = msg.len; //fill data length
 
-        if(msg.len != 0) {
-            WRITE_REG(CAN->sTxMailBox[txmailbox].TDHR,
-                      ((uint32_t)msg.buf[7] << CAN_TDH0R_DATA7_Pos) |
-                    ((uint32_t)msg.buf[6] << CAN_TDH0R_DATA6_Pos) |
-                    ((uint32_t)msg.buf[5] << CAN_TDH0R_DATA5_Pos) |
-                    ((uint32_t)msg.buf[4] << CAN_TDH0R_DATA4_Pos));
-            WRITE_REG(CAN->sTxMailBox[txmailbox].TDLR,
-                      ((uint32_t)msg.buf[3] << CAN_TDL0R_DATA3_Pos) |
-                    ((uint32_t)msg.buf[2] << CAN_TDL0R_DATA2_Pos) |
-                    ((uint32_t)msg.buf[1] << CAN_TDL0R_DATA1_Pos) |
-                    ((uint32_t)msg.buf[0] << CAN_TDL0R_DATA0_Pos));
-        }
+//        if(msg.len != 0) {
+//            WRITE_REG(CAN->sTxMailBox[txmailbox].TDHR,
+//                    ((uint32_t)msg.buf[7] << CAN_TDH0R_DATA7_Pos) |
+//                    ((uint32_t)msg.buf[6] << CAN_TDH0R_DATA6_Pos) |
+//                    ((uint32_t)msg.buf[5] << CAN_TDH0R_DATA5_Pos) |
+//                    ((uint32_t)msg.buf[4] << CAN_TDH0R_DATA4_Pos));
+//            WRITE_REG(CAN->sTxMailBox[txmailbox].TDLR,
+//                    ((uint32_t)msg.buf[3] << CAN_TDL0R_DATA3_Pos) |
+//                    ((uint32_t)msg.buf[2] << CAN_TDL0R_DATA2_Pos) |
+//                    ((uint32_t)msg.buf[1] << CAN_TDL0R_DATA1_Pos) |
+//                    ((uint32_t)msg.buf[0] << CAN_TDL0R_DATA0_Pos));
+//        }
 
-        if (!msg.isExt) {
-            CAN->sTxMailBox[txmailbox].TIR = (msg.id << CAN_TI0R_STID_Pos);
-            CLEAR_BIT(CAN->sTxMailBox[txmailbox].TIR, CAN_TI0R_IDE);
-        } else {
-            CAN->sTxMailBox[txmailbox].TIR = (msg.id << CAN_TI0R_EXID_Pos);
-            SET_BIT(CAN->sTxMailBox[txmailbox].TIR, CAN_TI0R_IDE);
-        }
-        CAN->sTxMailBox[txmailbox].TIR |= msg.rtr << CAN_TI0R_RTR_Pos;
-        CAN->sTxMailBox[txmailbox].TIR |= CAN_TI0R_TXRQ; // request a transmission
-    }
-}
+//        if (!msg.isExt) {
+//            CAN->sTxMailBox[txmailbox].TIR = (msg.id << CAN_TI0R_STID_Pos);
+//            CLEAR_BIT(CAN->sTxMailBox[txmailbox].TIR, CAN_TI0R_IDE);
+//        } else {
+//            CAN->sTxMailBox[txmailbox].TIR = (msg.id << CAN_TI0R_EXID_Pos);
+//            SET_BIT(CAN->sTxMailBox[txmailbox].TIR, CAN_TI0R_IDE);
+//        }
+//        CAN->sTxMailBox[txmailbox].TIR |= msg.rtr << CAN_TI0R_RTR_Pos;
+//        CAN->sTxMailBox[txmailbox].TIR |= CAN_TI0R_TXRQ; // request a transmission
+//    }
+//}
 
 extern "C" void CEC_CAN_IRQHandler(void);
 extern "C" void CEC_CAN_IRQHandler(void) {
@@ -191,18 +197,21 @@ extern "C" void CEC_CAN_IRQHandler(void) {
             rxmsg.buf[7] = (uint8_t)((CAN_RDH0R_DATA7 & CAN->sFIFOMailBox[rx_fifo].RDHR) >> CAN_RDH0R_DATA7_Pos);
         }
         __enable_irq();
-
-//        printf("id:0x%lX data:0x%02X%02X%02X%02X%02X%02X%02X%02X\n", rxmsg.id, rxmsg.buf[7], rxmsg.buf[6], rxmsg.buf[5], rxmsg.buf[4], rxmsg.buf[3], rxmsg.buf[2], rxmsg.buf[1], rxmsg.buf[0]);
-//        printf("f:%d r:%d sf:%d sr:%d\n", front_lever, rear_lever, front_sensor_ok, rear_sensor_ok);
-//        printf("speed:%d\n", speed_kmh);
-        process_message(static_cast<CanCmd_e>(mailbox_id), &rxmsg);
+        process_message(static_cast<CanCmd_e>(mailbox_id), rxmsg);
     }
 }
 
-static void process_message(CanCmd_e cmd, can_Message_t *msg) {
+static void process_message(CanCmd_e cmd, can_Message_t msg) {
     //TODO: Actually cmd is not a command id. (32bit mailbox reserves 2 filters)
-    if(cmd == 0){
-       abs_status_callback(msg);
+    switch (cmd) {
+    case CanCmd_e::ABS_MSG_ABS_STATUS_1:
+        abs_status_callback(&msg);
+        break;
+    case CanCmd_e::ABS_MSG_ABS_STATUS_2:
+        abs_rear_status_callback(&msg);
+        break;
+    default:
+        break;
     }
 }
 
@@ -214,18 +223,15 @@ static void abs_status_callback(can_Message_t *msg) {
     rear_lever = (data & CAN_RR_LEVR_Msk) >> CAN_RR_LEVR_Pos;
     front_sensor_ok = (data & CAN_FR_SENSOR_OK_Msk) >> CAN_FR_SENSOR_OK_Pos; //Goes 0 after two turns of the wheel
     rear_sensor_ok = (data & CAN_RR_SENSOR_OK_Msk) >> CAN_RR_SENSOR_OK_Pos; //Goes 0 after two turns of the wheel
-    speed_kmh = ((data & CAN_SPEED_Msk) >> CAN_SPEED_Pos) * 0.06f; //0.0625f;
+    front_speed_kmh = ((data & CAN_FRONT_SPEED_Msk) >> CAN_FRONT_SPEED_Pos) * 0.06f; //0.0625f;
     abs_status = ((data & CAN_ABS_STATUS_Msk) >> CAN_ABS_STATUS_Pos) == 0x5;
+
+//    printf("Fspeed:%d\n", (uint8_t)front_speed_kmh);
 }
 
-void send_abs_status() {
-    can_Message_t msg;
-    msg.id = 0x10C;
-    msg.buf[1] = 0x0;
-    msg.buf[2] = 0x30;// RPM 1100
-    msg.buf[3] = 0x11;// RPM 1100
-    msg.buf[5] = (0x6 << 4) | 0x5;
-    msg.buf[6] = 0xF0;
-//     msg.buf[5] = (0x5 << 4) | 0x5;
-    CAN_Transmit(msg);
+static void abs_rear_status_callback(can_Message_t *msg) {
+    uint64_t data;
+    memcpy(&data, msg->buf, sizeof(uint64_t));
+
+    rear_speed_kmh = ((data & CAN_REAR_SPEED_Msk) >> CAN_REAR_SPEED_Pos) * 0.06f;
 }

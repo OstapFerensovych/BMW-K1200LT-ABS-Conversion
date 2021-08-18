@@ -54,7 +54,7 @@ float mmap (float val, std::array<std::pair <float, float>, SIZE>& arr) {
 }
 
 void SPEEDO_Out(float kmh) {
-    if(kmh > 5) {
+    if(kmh > 5.0f) {
         SET_BIT(TIM3->CR1, TIM_CR1_CEN);
         uint16_t pwm = 200000.0f / mmap(kmh, kmh_to_hz);
         TIM3->PSC = pwm;

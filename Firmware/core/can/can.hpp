@@ -3,35 +3,11 @@
 #include <cstdint>
 
 enum CanCmd_e {
-  CS_MSG_SET_CAPSENSE_LED_STATUS,
-  CS_MSG_SET_CONFIG,
-  CS_HEARTBEAT,
-  CS_MSG_EVT_BUTTON,
+  ABS_MSG_ABS_STATUS_1 = 0,
+  ABS_MSG_ABS_STATUS_2 = 2,
 };
-
-enum side_e {
-  SIDE_LEFT,
-  SIDE_RIGHT,
-};
-
-const uint8_t SIDE = SIDE_RIGHT;
 
 #define CAN_ID_MASK  ((1U << 9) | 0x1FF)
-
-#define CAN_DEVID_SENSCAP 0x2
-
-
-
-#define CAN_CMD_Pos      0
-#define CAN_CMD_Msk      0x1F
-#define CAN_DEVID_Pos    5
-#define CAN_DEVID_Msk    0x1E0
-#define CAN_DEVENUM_Pos  9
-#define CAN_DEVENUM_Msk  0x600
-
-#define CANID_MAKE(dev_enum, dev_id, cmd) \
-  ((dev_enum << CAN_DEVENUM_Pos) | (dev_id << CAN_DEVID_Pos) | (cmd << CAN_CMD_Pos))
-#define SENSCAP_MAKE_CANID(cmd) CANID_MAKE(SIDE, CAN_DEVID_SENSCAP, cmd)
 
 int CAN_Init();
 bool CAN_front_lever();
@@ -39,5 +15,5 @@ bool CAN_rear_lever();
 bool CAN_front_sensor_ok();
 bool CAN_rear_sensor_ok();
 bool CAN_abs_on();
-void send_abs_status();
-uint8_t CAN_Speed();
+float CAN_SpeedFrontWheel();
+float CAN_SpeedRearWheel();

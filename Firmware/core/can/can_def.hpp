@@ -1,6 +1,7 @@
 #pragma once
 
 const uint16_t can_id_abs_status = 0x294;
+const uint16_t can_id_abs_rear_status = 0x2A8;
 
 #define CAN_ABS_STATUS_Pos (12U)
 #define CAN_ABS_STATUS_Msk (0xF000)
@@ -15,8 +16,11 @@ const uint16_t can_id_abs_status = 0x294;
 #define CAN_RR_LEVR_Pos  (3U+48U)
 #define CAN_RR_LEVR_Msk  (0x8000000000000)
 
-#define CAN_SPEED_Pos           (16U)
-#define CAN_SPEED_Msk           (0xFFFF0000)
+#define CAN_FRONT_SPEED_Pos           (16U)
+#define CAN_FRONT_SPEED_Msk           (0xFFFF0000)
+
+#define CAN_REAR_SPEED_Pos           (16U)
+#define CAN_REAR_SPEED_Msk           (0xFFFF0000)
 
 /* bxCAN Related */
 #define CAN_INIT_MODE_TMO 10

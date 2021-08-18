@@ -11,16 +11,18 @@
     rcc_init();
     errors_init();
     timing_init();
+
     SET_BIT(RCC->APB2ENR, RCC_APB2ENR_SYSCFGCOMPEN);
     READ_BIT(RCC->APB2ENR, RCC_APB2ENR_SYSCFGCOMPEN);
     SET_BIT(SYSCFG->CFGR1, SYSCFG_CFGR1_PA11_PA12_RMP);
+
     gpio::init();
     timing_sleep_ms(1000);
-    gpio::clear<gpio::line::tail_lights>();
+
+    gpio::clear<gpio::line::tail_lights>(); //Turn on Tail lights.
 
     CAN_Init();
     SPEEDO_Init();
-//    SPEEDO_Out(0);
 
     for (;;){
         if(CAN_front_lever() || CAN_rear_lever()) {
@@ -36,14 +38,11 @@
         }
 
         if(CAN_abs_on()) {
-            gpio::clear<gpio::line::gen_warn>();
-        } else {
             gpio::set<gpio::line::gen_warn>();
+        } else {
+            gpio::clear<gpio::line::gen_warn>();
         }
 
-//        timing_sleep_ms(10);
-//        send_abs_status();
-
-        SPEEDO_Out(CAN_Speed());
+        SPEEDO_Out(CAN_SpeedRearWheel());
     }
 }
